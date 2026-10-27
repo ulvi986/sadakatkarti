@@ -1,0 +1,36 @@
+{
+  "name": "sadakatkarti",
+  "version": "3.0.0",
+  "private": true,
+  "description": "Çox şirkətli QR sadiqlik kartı: öz bazası, SSE canlı yeniləmə, şirkət + admin panel, Hesabatım inteqrasiyası",
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently -k -n api,web -c yellow,cyan \"tsx watch src/server/index.ts\" \"vite\"",
+    "build": "tsc -p tsconfig.server.json && tsc -p tsconfig.json && vite build",
+    "start": "node --no-warnings dist/node/src/server/index.js",
+    "typecheck": "tsc -p tsconfig.server.json --noEmit && tsc -p tsconfig.json"
+  },
+  "engines": {
+    "node": "22.x"
+  },
+  "dependencies": {
+    "@electric-sql/pglite": "^0.5.12",
+    "@neondatabase/serverless": "^1.2.0",
+    "html5-qrcode": "^2.3.8",
+    "pg": "^8.23.1",
+    "qrcode.react": "^4.1.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@types/pg": "^8.23.1",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "concurrently": "^9.1.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.11"
+  }
+}

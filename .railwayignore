@@ -1,0 +1,9 @@
+node_modules
+dist
+data
+.vercel
+.env*
+.agents
+.claude
+.staff-pin.local
+skills-lock.json
