@@ -400,6 +400,25 @@ function broadcast(card: Card, company: Company, kind: CardEvent['type'] | 'sign
   publish('admin', activity);
 }
 
+/** Kart Hesabatım-ın customers cədvəlində yaranır (və ya eyni nömrəli mövcud kart qaytarılır), biz güzgüsünü saxlayırıq.
+ *  Hesabatım həmişə həmin nömrənin HAZIRKI tokenini verir — güzgüdə köhnə token qalıbsa burada düzəlir. */
+async function mirrorHesabatimCard(company: Company, name: string, phone: string, ip: string): Promise<{ card: Card; created: boolean }> {
+  const hc = await hesabatim.signup(company.hesabatim_slug!, name, phone, ip);
+  const db = await getDb();
+  const [existing] = await db.query('SELECT * FROM cards WHERE company_id = $1 AND phone = $2', [company.id, phone]);
+  const card = existing
+    ? toCard((await db.query(
+      `UPDATE cards SET token = $2, stamps = $3, rewards = $4, total_stamps = GREATEST(total_stamps, $5), active = true,
+         synced_at = now(), last_seen_at = now() WHERE id = $1 RETURNING *`,
+      [existing.id, hc.token, hc.stamps, hc.rewards, hc.total_stamps ?? 0]))[0])
+    : toCard((await db.query(
+      `INSERT INTO cards (company_id, token, name, phone, stamps, rewards, total_stamps, source, synced_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, 'hesabatim', now())
+       ON CONFLICT (token) DO UPDATE SET last_seen_at = now() RETURNING *`,
+      [company.id, hc.token, name, phone, hc.stamps, hc.rewards, hc.total_stamps ?? 0]))[0]);
+  return { card, created: !existing };
+}
+
 export async function signup(company: Company, rawName: unknown, rawPhone: unknown, ip: string): Promise<PublicCard> {
   const name = String(rawName ?? '').trim().replace(/\s+/g, ' ').slice(0, 60);
   if (name.length < 2) throw new HttpError(400, 'Adınızı yazın');
@@ -408,20 +427,8 @@ export async function signup(company: Company, rawName: unknown, rawPhone: unkno
   const db = await getDb();
 
   if (company.hesabatim_slug) {
-    // Kart Hesabatım-ın customers cədvəlində yaranır, biz güzgüsünü saxlayırıq
-    const hc = await hesabatim.signup(company.hesabatim_slug, name, phone, ip);
-    const [existing] = await db.query('SELECT * FROM cards WHERE company_id = $1 AND phone = $2', [company.id, phone]);
-    const card = existing
-      ? toCard((await db.query(
-        `UPDATE cards SET token = $2, stamps = $3, rewards = $4, total_stamps = GREATEST(total_stamps, $5), active = true,
-           synced_at = now(), last_seen_at = now() WHERE id = $1 RETURNING *`,
-        [existing.id, hc.token, hc.stamps, hc.rewards, hc.total_stamps ?? 0]))[0])
-      : toCard((await db.query(
-        `INSERT INTO cards (company_id, token, name, phone, stamps, rewards, total_stamps, source, synced_at)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, 'hesabatim', now())
-         ON CONFLICT (token) DO UPDATE SET last_seen_at = now() RETURNING *`,
-        [company.id, hc.token, name, phone, hc.stamps, hc.rewards, hc.total_stamps ?? 0]))[0]);
-    if (!existing) {
+    const { card, created } = await mirrorHesabatimCard(company, name, phone, ip);
+    if (created) {
       log({ category: 'audit', action: 'card.signup', companyId: company.id, actor: 'customer', ip,
         message: `${name} kart açdı (Hesabatım)`, meta: { token: mask(card.token) } });
       broadcast(card, company, 'signup', 0, 'customer');
@@ -460,7 +467,20 @@ export async function findCard(company: Company, rawPhone: unknown, ip: string):
     throw new HttpError(404, 'Bu nömrə ilə kart tapılmadı. Yeni kart açın.');
   }
   let card = toCard(r);
-  if (card.source === 'hesabatim') card = await refreshFromHesabatim(card, company, ip);
+  if (card.source === 'hesabatim' && company.hesabatim_slug) {
+    card = await refreshFromHesabatim(card, company, ip);
+    if (!card.active) {
+      // Güzgüdəki token köhnədir (Hesabatım kartı yenisi ilə əvəz edib, webhook çatmayıb). Əks halda başqa telefondan
+      // nömrə ilə girən QR əvəzinə "kart əvəz olunub" görür və heç vaxt çıxa bilmir — hazırkı tokeni nömrə ilə götürürük.
+      const old = card.token;
+      card = (await mirrorHesabatimCard(company, card.name, phone, ip)).card;
+      if (card.token !== old) {
+        publish(`card:${old}`, { type: 'card', card: { ...publicCard(card, company), token: old, active: false } });
+        log({ category: 'integration', action: 'card.reissued', companyId: company.id, actor: 'customer', ip,
+          message: `${card.name}: köhnə token yeniləndi (nömrə ilə giriş)`, meta: { token: mask(card.token) } });
+      }
+    }
+  }
   log({ category: 'audit', action: 'card.login', companyId: company.id, actor: 'customer', ip,
     message: `${card.name} nömrə ilə kartına daxil oldu`, meta: { token: mask(card.token) } });
   return publicCard(card, company);
