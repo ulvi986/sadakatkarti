@@ -141,7 +141,8 @@ export function CardSummary({ card, children }: { card: StaffCard; children?: Re
           </div>
           <div className="count">{card.stamps}/{card.stampsNeeded}</div>
         </div>
-        <StampGrid stamps={card.stamps} needed={card.stampsNeeded} rewardReady={card.rewardReady} />
+        <StampGrid stamps={card.stamps} needed={card.stampsNeeded} rewardReady={card.rewardReady}
+                   logoUrl={card.company.logoUrl} companyName={card.company.name} />
         <div className="who">
           Cəmi {card.totalStamps} möhür · {card.rewards} hədiyyə · {card.source === 'hesabatim' ? 'Hesabatım kartı' : 'Lokal kart'}
           {!card.active && ' · əvəz olunub'}

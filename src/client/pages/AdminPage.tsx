@@ -158,7 +158,7 @@ function Admin({ ip, onLogout }: { ip: string; onLogout: () => void }) {
   );
 }
 
-const EMPTY: CompanyInput = { slug: '', name: '', stampsNeeded: 9, reward: 'Pulsuz kofe', hesabatimSlug: '', username: '', password: '' };
+const EMPTY: CompanyInput = { slug: '', name: '', stampsNeeded: 9, reward: 'Pulsuz məhsul', hesabatimSlug: '', username: '', password: '' };
 
 function Companies({ companies, reload }: { companies: CompanyAdminView[]; reload: () => void }) {
   const [form, setForm] = useState<CompanyInput>(EMPTY);

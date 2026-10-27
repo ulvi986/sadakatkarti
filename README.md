@@ -1,4 +1,4 @@
-# SadakatKarti — QR sadiqlik kartı (çox şirkətli) ☕
+# SadakatKarti — QR sadiqlik kartı (çox şirkətli)
 
 Müştəri telefonunda QR kartı saxlayır, kassada skan olunur, N möhürdən sonra hədiyyə. Hər şirkətin öz paneli var,
 ümumi admin panel isə bütün şirkətləri, kartları və logları canlı göstərir. Hesabatım-a bağlı şirkətlərin kartları

@@ -88,6 +88,7 @@ button.gold { background: var(--accent); color: var(--accent-ink); }
 }
 .stamp.on { background: #fff; border: 2px solid var(--card-ink); }
 .stamp.on.pop { animation: pop .5s ease; }
+.stamp-logo { width: 72%; height: 72%; object-fit: contain; border-radius: 50%; }
 .stamp.free { border-color: var(--accent); color: var(--accent); font-size: .62rem; font-weight: 800; }
 .stamp.free.ready { background: var(--accent); color: var(--accent-ink); animation: pulse 1.4s infinite; }
 @keyframes pop { 0% { transform: scale(.4); } 70% { transform: scale(1.15); } 100% { transform: scale(1); } }

@@ -53,7 +53,7 @@ function Login({ onLogin }: { onLogin: () => void }) {
 
   return (
     <div className="wrap">
-      <div className="brand"><div className="logo">☕</div><h1>Şirkət paneli</h1><div className="muted">Sadiqlik kartı</div></div>
+      <div className="brand"><div className="logo">★</div><h1>Şirkət paneli</h1><div className="muted">Sadiqlik kartı</div></div>
       <div className="panel">
         <nav className="tabs">
           <button type="button" className={mode === 'hesabatim' ? 'on' : ''} onClick={() => switchMode('hesabatim')}>Hesabatım hesabı</button>

@@ -4,9 +4,12 @@ interface Props {
   rewardReady: boolean;
   /** Bu indeksdən sonrakı möhürlər animasiya ilə görünür (yeni vurulanlar) */
   animateFrom?: number | null;
+  /** Vurulmuş möhürdə şirkətin loqosu; yoxdursa adının baş hərfi */
+  logoUrl?: string | null;
+  companyName: string;
 }
 
-export default function StampGrid({ stamps, needed, rewardReady, animateFrom = null }: Props) {
+export default function StampGrid({ stamps, needed, rewardReady, animateFrom = null, logoUrl = null, companyName }: Props) {
   return (
     <div className="stamps">
       {Array.from({ length: needed }, (_, i) => {
@@ -14,7 +17,7 @@ export default function StampGrid({ stamps, needed, rewardReady, animateFrom = n
         const pop = on && animateFrom !== null && i >= animateFrom;
         return (
           <div key={i} className={`stamp${on ? ' on' : ''}${pop ? ' pop' : ''}`}>
-            {on ? '☕' : ''}
+            {on && (logoUrl ? <img className="stamp-logo" src={logoUrl} alt="" /> : companyName.trim().charAt(0).toUpperCase())}
           </div>
         );
       })}

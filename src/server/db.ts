@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS companies (
   slug TEXT NOT NULL UNIQUE,
   name TEXT NOT NULL,
   stamps_needed INT NOT NULL DEFAULT 9,
-  reward TEXT NOT NULL DEFAULT 'Pulsuz kofe',
+  reward TEXT NOT NULL DEFAULT 'Pulsuz məhsul',
   hesabatim_slug TEXT,
   username TEXT NOT NULL UNIQUE,
   password_hash TEXT NOT NULL,

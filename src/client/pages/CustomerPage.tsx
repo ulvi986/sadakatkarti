@@ -109,7 +109,7 @@ export default function CustomerPage({ urlToken, urlSlug }: { urlToken: string |
       <div className="brand">
         {shown?.logoUrl
           ? <img className="logo logo-img" src={shown.logoUrl} alt={`${shown.name} loqosu`} />
-          : <div className="logo">☕</div>}
+          : <div className="logo">{shown ? shown.name.trim().charAt(0).toUpperCase() : '★'}</div>}
         <h1>{shown?.name ?? 'Sadiqlik Kartı'}</h1>
         {!shown && <div className="muted">Möhür yığ, hədiyyə qazan</div>}
         {shown && (
@@ -299,7 +299,8 @@ function CardView({ card, live, onLogout }: { card: PublicCard; live: boolean; o
           <div className="count">{card.stamps}/{card.stampsNeeded}</div>
         </div>
         <StampGrid stamps={card.stamps} needed={card.stampsNeeded} rewardReady={card.rewardReady}
-                   animateFrom={animateFrom} />
+                   animateFrom={animateFrom} logoUrl={card.company.logoUrl}
+                   companyName={card.company.name} />
         <div className="who">
           {card.rewardReady
             ? `Hədiyyən hazırdır: ${card.company.reward}!`
